@@ -83,6 +83,8 @@ cfg_if::cfg_if! {
             all(feature = "asm_on_experimental_targets", any(target_os = "ios", target_os = "tvos"), target_arch = "aarch64"),
             // windows 32 bit arm. No idea how to test this.
             all(feature = "asm_on_experimental_targets", windows, target_arch = "arm"),
+            all(feature = "asm_on_experimental_targets", target_arch = "riscv32"), // FIXME: is this the correct target name?
+            all(feature = "asm_on_experimental_targets", target_arch = "riscv64"), // FIXME: is this the correct target name?
         ),
     ))] {
         #[inline(always)]
@@ -164,6 +166,13 @@ cfg_if::cfg_if! {
                         // This is some thread-specific pointer. Not sure if TCB or TLS base.
                         asm_maybe_with_pure!(
                             "mrs {}, tpidr_el0",
+                            out(reg) output,
+                            options(nostack, nomem, preserves_flags),
+                        );
+                    } else if #[cfg(any(target_arch = "riscv32", target_arch = "riscv64"))] {
+                        // This is a pointer to the TLB, see "x4"/"tp": https://de.wikipedia.org/wiki/RISC-V#ABI
+                        asm_maybe_with_pure!(
+                            "mov {}, tp",
                             out(reg) output,
                             options(nostack, nomem, preserves_flags),
                         );
