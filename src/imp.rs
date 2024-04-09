@@ -87,6 +87,7 @@ cfg_if::cfg_if! {
     ))] {
         #[inline(always)]
         pub(crate) fn tid_impl() -> NonZeroUsize {
+            // TODO: add more sources for impls
             unsafe {
                 #[allow(unused_assignments)]
                 let mut output = 0usize;
@@ -115,6 +116,7 @@ cfg_if::cfg_if! {
                         );
                     } else if #[cfg(all(windows, target_arch = "x86_64"))] {
                         // manual impl of NtCurrentTeb (64 bit ptrs).
+                        // for more info see: https://en.wikipedia.org/wiki/Win32_Thread_Information_Block
                         asm_maybe_with_pure!(
                             "mov {}, gs:48",
                             out(reg) output,
@@ -122,6 +124,7 @@ cfg_if::cfg_if! {
                         );
                     } else if #[cfg(all(windows, target_arch = "x86"))] {
                         // manual impl of NtCurrentTeb (32 bit ptrs).
+                        // for more info see: https://en.wikipedia.org/wiki/Win32_Thread_Information_Block
                         asm_maybe_with_pure!(
                             "mov {}, fs:24",
                             out(reg) output,
